@@ -1,5 +1,6 @@
 ## Fork changes
 - v3 taggers added
+- Z3D-E621-Convnext tagger added
 - Onnxruntime dep version required by v3 taggers 
 
 Tagger for [Automatic1111's WebUI](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
