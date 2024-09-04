@@ -38,6 +38,11 @@ interrogators: Dict[str, Interrogator] = {
         # the name is misleading, but it's v1
         repo_id='SmilingWolf/wd-v1-4-convnextv2-tagger-v2',
     ),
+    'wd14-eva02.v3.large': WaifuDiffusionInterrogator(
+        'WD14 EVA02 v3 Large',
+        # Moved "Large" to the end to fix organization
+        repo_id='SmilingWolf/wd-eva02-large-tagger-v3',
+    ),
     'wd14-swinv2-v1': WaifuDiffusionInterrogator(
         'WD14 SwinV2 v1',
         # again misleading name
@@ -51,6 +56,11 @@ interrogators: Dict[str, Interrogator] = {
         'WD14 ViT v3',
         repo_id='SmilingWolf/wd-vit-tagger-v3'
     ), 
+    'wd14-vit.v3.large': WaifuDiffusionInterrogator(
+        'WD14 ViT v3 Large',
+        # Moved "Large" to the end to fix organization
+        repo_id='SmilingWolf/wd-vit-large-tagger-v3',
+    ),
     'wd-v1-4-convnext-tagger.v3': WaifuDiffusionInterrogator(
         'WD14 ConvNext v3',
         repo_id='SmilingWolf/wd-convnext-tagger-v3'
