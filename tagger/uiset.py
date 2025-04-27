@@ -192,6 +192,22 @@ class IOData:
                         cls.err.add(msg)
                 else:
                     cls.paths.append([path, tags_out, output_dir])
+                    
+    @classmethod
+    def read_existing_tags(cls, file_path):
+        """Read existing tags from a text file if it exists"""
+        if not os.path.exists(file_path):
+            return []
+            
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+                if not content:
+                    return []
+                return [tag.strip() for tag in content.split(',')]
+        except Exception as e:
+            print(f"Error reading tags from {file_path}: {e}")
+            return []
 
 
 class QData:
@@ -204,6 +220,7 @@ class QData:
     threshold = 0.35
     tag_frac_threshold = 0.05
     count_threshold = getattr(shared.opts, 'tagger_count_threshold', 100)
+    merge_existing = False
 
     # read from db.json, update with what should be written to db.json:
     json_db = None
@@ -399,32 +416,45 @@ class QData:
                 cls.had_new = False
                 msg = f'Error reading {cls.json_db}'
                 cls.err.discard(msg)
-                # validate json using either json_schema/db_jon_v1_schema.json
-                # or json_schema/db_jon_v2_schema.json
 
-                schema = Path(__file__).parent.parent.joinpath(
-                    'json_schema', 'db_json_v1_schema.json'
-                )
                 try:
                     data = loads(cls.json_db.read_text())
+                    
+                    # Validate schema
+                    schema = Path(__file__).parent.parent.joinpath(
+                        'json_schema', 'db_json_v1_schema.json'
+                    )
                     validate(data, loads(schema.read_text()))
 
-                    # convert v2 back to v1
-                    if "meta" in data:
-                        cls.had_new = True  # <- force write for v2 -> v1
+                    # Update class data
+                    cls.query = data["query"]
+                    cls.weighed = (
+                        defaultdict(list, data["rating"]),
+                        defaultdict(list, data["tag"])
+                    )
+                    
+                    # Initialize cls.tags with average weights from weighed data
+                    cls.tags.clear()
+                    for tag, weights in cls.weighed[1].items():
+                        if weights:  # Only process if we have weights
+                            # Calculate average weight by taking fractional part of each weight
+                            avg_weight = sum(weight - int(weight) for weight in weights) / len(weights)
+                            cls.tags[tag] = avg_weight
+
+                    print(f'Read {cls.json_db}: {len(cls.query)} interrogations, '
+                          f'{len(cls.tags)} tags.')
+
                 except (ValidationError, IndexError) as err:
                     print(f'{msg}: {repr(err)}')
                     cls.err.add(msg)
                     data = {"query": {}, "tag": [], "rating": []}
-
-                cls.query = data["query"]
-                cls.weighed = (
-                    defaultdict(list, data["rating"]),
-                    defaultdict(list, data["tag"])
-                )
-                print(f'Read {cls.json_db}: {len(cls.query)} interrogations, '
-                      f'{len(cls.tags)} tags.')
-
+                    cls.query = data["query"]
+                    cls.weighed = (
+                        defaultdict(list, data["rating"]),
+                        defaultdict(list, data["tag"])
+                    )
+                    cls.tags.clear()
+                
     @classmethod
     def write_json(cls) -> None:
         """ write db.json """
@@ -617,9 +647,21 @@ class QData:
         for ent, val in cls.ratings.items():
             ratings[ent] = val / count
 
-        weighted_tags_files = getattr(shared.opts,
-                                      'tagger_weighted_tags_files', False)
+        weighted_tags_files = getattr(shared.opts, 'tagger_weighted_tags_files', False)
+        merge_existing = getattr(shared.opts, 'tagger_merge_existing_tags', False)
+
         for file, remaining_tags in cls.for_tags_file.items():
+            # If merge_existing is True, read existing tags
+            existing_tags = []
+            if cls.merge_existing and os.path.exists(file):
+                existing_tags = IOData.read_existing_tags(file)
+                existing_tags_set = set(existing_tags)
+                
+                # Add existing tags that aren't already in the remaining_tags
+                for tag in existing_tags:
+                    if tag not in remaining_tags:
+                        remaining_tags[tag] = 1.0  # Give existing tags maximum confidence
+                        
             sorted_tags = cls.sort_tags(remaining_tags)
             if weighted_tags_files:
                 sorted_tags = [f'({k}:{v})' for k, v in sorted_tags]
