@@ -131,6 +131,16 @@ def on_ui_settings():
             section=section,
         ),
     )
+    
+    # merge interrogations from text files
+    shared.opts.add_option(
+        key='tagger_merge_existing_tags',
+        info=shared.OptionInfo(
+            False,
+            label='Merge with existing tags in text files before overwriting',
+            section=section,
+        ),
+    )
 
 
 def split_str(string: str, separator=',') -> List[str]:
