@@ -12,3 +12,4 @@ pandas
 Pillow
 tensorflow
 tqdm
+onnxruntime>=1.17.0

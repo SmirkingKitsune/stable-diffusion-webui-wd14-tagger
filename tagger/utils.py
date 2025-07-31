@@ -10,7 +10,7 @@ from modules.shared import models_path  # pylint: disable=import-error
 default_ddp_path = Path(models_path, 'deepdanbooru')
 default_onnx_path = Path(models_path, 'TaggerOnnx')
 from tagger.preset import Preset  # pylint: disable=import-error
-from tagger.interrogator import Interrogator, DeepDanbooruInterrogator, \
+from tagger.interrogator import Interrogator, DeepDanbooruInterrogator, Z3DInterrogator, \
                                 MLDanbooruInterrogator  # pylint: disable=E0401 # noqa: E501
 from tagger.interrogator import WaifuDiffusionInterrogator  # pylint: disable=E0401 # noqa: E501
 
@@ -38,6 +38,11 @@ interrogators: Dict[str, Interrogator] = {
         # the name is misleading, but it's v1
         repo_id='SmilingWolf/wd-v1-4-convnextv2-tagger-v2',
     ),
+    'wd14-eva02.v3.large': WaifuDiffusionInterrogator(
+        'WD14 EVA02 v3 Large',
+        # Moved "Large" to the end to fix organization
+        repo_id='SmilingWolf/wd-eva02-large-tagger-v3',
+    ),
     'wd14-swinv2-v1': WaifuDiffusionInterrogator(
         'WD14 SwinV2 v1',
         # again misleading name
@@ -46,6 +51,23 @@ interrogators: Dict[str, Interrogator] = {
     'wd-v1-4-moat-tagger.v2': WaifuDiffusionInterrogator(
         'WD14 moat tagger v2',
         repo_id='SmilingWolf/wd-v1-4-moat-tagger-v2'
+    ),
+    'wd-v1-4-vit-tagger.v3': WaifuDiffusionInterrogator(
+        'WD14 ViT v3',
+        repo_id='SmilingWolf/wd-vit-tagger-v3'
+    ), 
+    'wd14-vit.v3.large': WaifuDiffusionInterrogator(
+        'WD14 ViT v3 Large',
+        # Moved "Large" to the end to fix organization
+        repo_id='SmilingWolf/wd-vit-large-tagger-v3',
+    ),
+    'wd-v1-4-convnext-tagger.v3': WaifuDiffusionInterrogator(
+        'WD14 ConvNext v3',
+        repo_id='SmilingWolf/wd-convnext-tagger-v3'
+    ),
+    'wd-v1-4-swinv2-tagger.v3': WaifuDiffusionInterrogator(
+        'WD14 SwinV2 v3',
+        repo_id='SmilingWolf/wd-swinv2-tagger-v3'
     ),
     'mld-caformer.dec-5-97527': MLDanbooruInterrogator(
         'ML-Danbooru Caformer dec-5-97527',
@@ -56,6 +78,11 @@ interrogators: Dict[str, Interrogator] = {
         'ML-Danbooru TResNet-D 6-30000',
         repo_id='deepghs/ml-danbooru-onnx',
         model_path='TResnet-D-FLq_ema_6-30000.onnx'
+    ),
+    'Z3D-E621-Convnext': Z3DInterrogator(
+        'Z3D-E621-Convnext',
+        repo_id='toynya/Z3D-E621-Convnext',
+        model_path='model.onnx'
     ),
 }
 
